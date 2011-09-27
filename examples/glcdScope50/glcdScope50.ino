@@ -14,7 +14,6 @@ void setup () {
   Serial.println("\n[glcdScope50]");  
   glcd.begin();
   glcd.backLight(255);
-  digitalWrite(2, 1);
 }
 
 void loop () {
