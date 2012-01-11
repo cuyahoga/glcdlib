@@ -1,4 +1,4 @@
-uint8_t font_luIS14[2599] PROGMEM = {
+const uint8_t font_luIS14[2599] PROGMEM = {
 // IMAGE DATA:
  /* height, pixels: */ 20,
  /* width in bytes: */ 120,

@@ -1,4 +1,4 @@
-uint8_t font_charBI18[4326] PROGMEM = {
+const uint8_t font_charBI18[4326] PROGMEM = {
 // IMAGE DATA:
  /* height, pixels: */ 25,
  /* width in bytes: */ 165,

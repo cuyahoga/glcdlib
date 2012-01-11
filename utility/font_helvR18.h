@@ -1,4 +1,4 @@
-uint8_t font_helvR18[3224] PROGMEM = {
+const uint8_t font_helvR18[3224] PROGMEM = {
 // IMAGE DATA:
  /* height, pixels: */ 25,
  /* width in bytes: */ 121,
