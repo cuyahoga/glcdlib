@@ -1,4 +1,4 @@
-uint8_t font_timBI18[3581] PROGMEM = {
+const uint8_t font_timBI18[3581] PROGMEM = {
 // IMAGE DATA:
  /* height, pixels: */ 23,
  /* width in bytes: */ 147,
