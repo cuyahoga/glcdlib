@@ -1,16 +1,8 @@
-Work in progress - see <http://forum.jeelabs.net/node/457>
-
 This library lets an ATmega328 drive an ST7565-based GLCD display.
 
-First use by JeeLabs: http://jeelabs.org/2010/11/15/meet-the-graphics-board/
+Derived from the JeeLabs GLCD_ST7565 library (https://github.com/jcw/glcdlib) which is targeted at their own Graphics Board and modified to work with a bare ST7565 board (as sold by Adafruit).
 
-Derived from code in the ST7565 library by Adafruit, hence under LGPL license.
-
-The home page for this library is <http://jeelabs.org/glcdlib>
-
-You can download this project in either
-[zip](https://github.com/jcw/glcdlib/zipball/master) or
-[tar](https://github.com/jcw/glcdlib/tarball/master) formats.
+That in turn was derived from code in the ST7565 library by Adafruit (https://github.com/adafruit/ST7565-LCD)
 
 Unpack the archive and rename the result to `GLCDlib`.  
 Put it in the `libraries` folder in your Arduino sketches area.  

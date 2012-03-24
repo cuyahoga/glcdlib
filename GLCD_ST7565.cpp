@@ -13,12 +13,13 @@
 #include "GLCD_ST7565.h"
 #include "GLCD_ST7565_cmds.h"
 
-#define PIN_SID  14
-#define PIN_SCLK 4
-#define PIN_A0   17
-#define PIN_RST  7
+#define PIN_SID  9
+#define PIN_SCLK 8
+#define PIN_A0   7
+#define PIN_RST  6
+#define PIN_CS   5
 
-#define LCDUNUSEDSTARTBYTES 4
+#define LCDUNUSEDSTARTBYTES 1
 
 #define swap(a, b) { byte t = a; a = b; b = t; }
 
@@ -33,7 +34,7 @@ struct FontInfo {
 static byte gLCDBuf[1024];
 
 // Switch from fast direct bit flipping to slower Arduino bit writes.
-//#define slowSPI
+#define slowSPI
 
 // This makes the library track where changes have occurred and only update the smallest rectangle required
 // If you are writing direct to the gLCDBuf you will either need to turn this off, or call setUpdateArea() with the
@@ -53,8 +54,8 @@ static byte yUpdateMax;
 #endif
 
 // If the top line is appearing halfway down the screen, try the other mode.
-#define PAGE_FLIP 0x7
-// #define PAGE_FLIP 0x3
+//#define PAGE_FLIP 0x7
+#define PAGE_FLIP 0x3
 
 static void SPIWrite(byte c) {
 #ifdef slowSPI
@@ -107,6 +108,10 @@ static void st7565_Init() {
     pinMode(PIN_SCLK, OUTPUT);
     pinMode(PIN_A0,   OUTPUT);
     pinMode(PIN_RST,  OUTPUT);
+    pinMode(PIN_CS,   OUTPUT);
+
+    // toggle RST low to reset; CS low so it'll listen to us
+    digitalWrite(PIN_CS, LOW);
 
     digitalWrite(PIN_RST, LOW);
     _delay_ms(500);
