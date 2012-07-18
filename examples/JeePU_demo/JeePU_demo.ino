@@ -45,7 +45,7 @@ void loop () {
     glcd.drawLine(0,40,127,40,1);
     refreshAndWait();
     
-    glcd.drawString(8,32,"And make it dotted");
+    glcd.drawString(8,42,"And make it dotted");
     refreshAndWait();
     
     for (int i=0;i<=21;i++)
