@@ -31,7 +31,9 @@ void setup () {
 #endif    
     glcd.begin();
     glcd.backLight(255);
-    // glcd.setFont(font_clR6x8);
+#if not REMOTE
+    glcd.setFont(font_clR6x8);
+#endif
 }
 
 void loop () {
