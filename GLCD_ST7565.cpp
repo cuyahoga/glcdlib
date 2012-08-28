@@ -57,6 +57,11 @@ static byte yUpdateMax;
 //#define PAGE_FLIP 0x7
 #define PAGE_FLIP 0x3
 
+const bool rotate180=false;
+// This const switches in the code for operating an LCD panel rotated by 180 degrees.
+// The image created is rotated as it is writen into gLCDBuf. This was much faster than performing the required
+// bit rotates if it had been implimented in the buffer to panel code.
+
 static void SPIWrite(byte c) {
 #ifdef slowSPI
     shiftOut(PIN_SID, PIN_SCLK, MSBFIRST, c);
@@ -148,6 +153,10 @@ void GLCD_ST7565::backLight(byte level) {
 
 // the most basic function, set a single pixel
 void GLCD_ST7565::setPixel(byte x, byte y, byte color) {
+    if (rotate180) {
+		x=(LCDWIDTH-1)-x;
+		y=(LCDHEIGHT-1)-y;
+	}    
   if (x < LCDWIDTH && y < LCDHEIGHT) {
     if (color) 
         gLCDBuf[x+ (y/8)*128] |=  _BV(7-(y%8));  
@@ -165,7 +174,11 @@ void GLCD_ST7565::setPixel(byte x, byte y, byte color) {
 
 static void mySetPixel(byte x, byte y, byte color) {
 #if tradeSizeForSpeed
-    if (x < LCDWIDTH && y < LCDHEIGHT) {
+	if (rotate180) {
+		x=(LCDWIDTH-1)-x;
+		y=(LCDHEIGHT-1)-y;
+	}    
+	if (x < LCDWIDTH && y < LCDHEIGHT) {
       if (color) 
           gLCDBuf[x+ (y/8)*128] |=  _BV(7-(y%8));  
       else
@@ -282,7 +295,13 @@ byte GLCD_ST7565::drawString_P(byte x, byte y, const char *c) {
 void GLCD_ST7565::drawLine(byte x0, byte y0, byte x1, byte y1, 
                       byte color) {
 #if tradeSizeForSpeed            
-    if (x0 > xUpdateMax) xUpdateMax = x0;
+	if (rotate180) {
+		x0=(LCDWIDTH-1)-x0;
+		x1=(LCDWIDTH-1)-x1;
+		y0=(LCDHEIGHT-1)-y0;
+		y1=(LCDHEIGHT-1)-y1;
+	}
+	if (x0 > xUpdateMax) xUpdateMax = x0;
     if (x0 < xUpdateMin) xUpdateMin = x0;
     if (x1 > xUpdateMax) xUpdateMax = x1;
     if (x1 < xUpdateMin) xUpdateMin = x1;
@@ -291,6 +310,14 @@ void GLCD_ST7565::drawLine(byte x0, byte y0, byte x1, byte y1,
     if (y0 < yUpdateMin) yUpdateMin = y0;
     if (y1 > yUpdateMax) yUpdateMax = y1;
     if (y1 < yUpdateMin) yUpdateMin = y1;
+	
+	if (rotate180) {
+		x0=(LCDWIDTH-1)-x0;
+		x1=(LCDWIDTH-1)-x1;
+		y0=(LCDHEIGHT-1)-y0;
+		y1=(LCDHEIGHT-1)-y1;
+	}
+	
 #endif
 
     byte steep = abs(y1-y0) > abs(x1-x0);
@@ -329,18 +356,6 @@ void GLCD_ST7565::drawTriangle(byte x0, byte y0, byte x1, byte y1, byte x2, byte
 }
 
 static void drawTriangleLine(byte x0, byte y0, byte x1, byte y1, byte firstLine, byte *points, byte color) {
-#if tradeSizeForSpeed
-    if (x0 > xUpdateMax) xUpdateMax = x0;
-    if (x0 < xUpdateMin) xUpdateMin = x0;
-    if (x1 > xUpdateMax) xUpdateMax = x1;
-    if (x1 < xUpdateMin) xUpdateMin = x1;
-                                      
-    if (y0 > yUpdateMax) yUpdateMax = y0;
-    if (y0 < yUpdateMin) yUpdateMin = y0;
-    if (y1 > yUpdateMax) yUpdateMax = y1;
-    if (y1 < yUpdateMin) yUpdateMin = y1;
-#endif
-
     byte steep = abs(y1 - y0) > abs(x1 - x0);
     if (steep) {
         swap(x0, y0);
@@ -396,10 +411,22 @@ void GLCD_ST7565::fillTriangle(byte x0, byte y0, byte x1, byte y1, byte x2, byte
 void GLCD_ST7565::fillRect(byte x, byte y, byte w, byte h, byte color) {
     // stupidest version - just pixels - but fast with internal buffer!
 #if tradeSizeForSpeed
-    if (x < xUpdateMin) xUpdateMin = x;
-    if (y < yUpdateMin) yUpdateMin = y;
-    if (x+w > xUpdateMax) xUpdateMax = x+w;
-    if (y+h > yUpdateMax) yUpdateMax = y+h;
+	if (rotate180) {
+		x=(LCDWIDTH-1)-x;
+		y=(LCDHEIGHT-1)-y;
+		if ((x-w) < xUpdateMin) xUpdateMin = x-w;
+		if ((y-h) < yUpdateMin) yUpdateMin = y-h;
+		if (x > xUpdateMax) xUpdateMax = x;
+		if (y > yUpdateMax) yUpdateMax = y;
+		x=(LCDWIDTH-1)-x;
+		y=(LCDHEIGHT-1)-y;
+	}
+	else {
+		if (x < xUpdateMin) xUpdateMin = x;
+		if (y < yUpdateMin) yUpdateMin = y;
+		if (x+w > xUpdateMax) xUpdateMax = x+w;
+		if (y+h > yUpdateMax) yUpdateMax = y+h;
+	}
 #endif
 
     for (byte i = x; i < x+w; i++) {
@@ -412,10 +439,22 @@ void GLCD_ST7565::fillRect(byte x, byte y, byte w, byte h, byte color) {
 void GLCD_ST7565::drawRect(byte x, byte y, byte w, byte h, byte color) {
     // stupidest version - just pixels - but fast with internal buffer!
 #if tradeSizeForSpeed
-    if (x < xUpdateMin) xUpdateMin = x;
-    if (y < yUpdateMin) yUpdateMin = y;
-    if (x+w > xUpdateMax) xUpdateMax = x+w;
-    if (y+h > yUpdateMax) yUpdateMax = y+h;
+	if (rotate180) {
+		x=(LCDWIDTH-1)-x;
+		y=(LCDHEIGHT-1)-y;
+		if ((x-w) < xUpdateMin) xUpdateMin = x-w;
+		if ((y-h) < yUpdateMin) yUpdateMin = y-h;
+		if (x > xUpdateMax) xUpdateMax = x;
+		if (y > yUpdateMax) yUpdateMax = y;
+		x=(LCDWIDTH-1)-x;
+		y=(LCDHEIGHT-1)-y;
+	}
+	else {
+		if (x < xUpdateMin) xUpdateMin = x;
+		if (y < yUpdateMin) yUpdateMin = y;
+		if (x+w > xUpdateMax) xUpdateMax = x+w;
+		if (y+h > yUpdateMax) yUpdateMax = y+h;
+	}
 #endif
 
     for (byte i=x; i<x+w; i++) {
@@ -432,10 +471,18 @@ void GLCD_ST7565::drawRect(byte x, byte y, byte w, byte h, byte color) {
 // draw a circle outline
 void GLCD_ST7565::drawCircle(byte x0, byte y0, byte r, byte color) {
 #if tradeSizeForSpeed
+	if (rotate180) {
+		x0=(LCDWIDTH-1)-x0;
+		y0=(LCDHEIGHT-1)-y0;
+	}
     if (x0-r < xUpdateMin) xUpdateMin = x0-r;
     if (y0-r < yUpdateMin) yUpdateMin = y0-r;
     if (x0+r > xUpdateMax) xUpdateMax = x0+r;
     if (y0+r > yUpdateMax) yUpdateMax = y0+r;   
+	if (rotate180) {
+		x0=(LCDWIDTH-1)-x0;
+		y0=(LCDHEIGHT-1)-y0;
+	}
 #endif
 
     char f = 1 - r;
@@ -473,10 +520,18 @@ void GLCD_ST7565::drawCircle(byte x0, byte y0, byte r, byte color) {
 
 void GLCD_ST7565::fillCircle(byte x0, byte y0, byte r, byte color) {
 #if tradeSizeForSpeed
+	if (rotate180) {
+		x0=(LCDWIDTH-1)-x0;
+		y0=(LCDHEIGHT-1)-y0;
+	}
     if (x0-r < xUpdateMin) xUpdateMin = x0-r;
     if (y0-r < yUpdateMin) yUpdateMin = y0-r;
     if (x0+r > xUpdateMax) xUpdateMax = x0+r;
     if (y0+r > yUpdateMax) yUpdateMax = y0+r;   
+	if (rotate180) {
+		x0=(LCDWIDTH-1)-x0;
+		y0=(LCDHEIGHT-1)-y0;
+	}	
 #endif
 
     char f = 1 - r;
@@ -552,7 +607,14 @@ void GLCD_ST7565::setUpdateArea(byte x0, byte y0, byte x1, byte y1, byte allowRe
         xUpdateMin = LCDWIDTH-1;
         yUpdateMin = LCDHEIGHT-1;     
     } else {
-        if (x0 > x1) swap(x0,x1);
+        if (rotate180) {
+			x0=(LCDWIDTH-1)-x0;
+			x1=(LCDWIDTH-1)-x1;
+			y0=(LCDHEIGHT-1)-y0;
+			y1=(LCDHEIGHT-1)-y1;
+		}
+		
+		if (x0 > x1) swap(x0,x1);
         if (y0 > y1) swap(y0,y1);
     
         if (allowReduction) {
@@ -711,10 +773,20 @@ static void st7565_scrollRight(byte x) {
 }
 
 void GLCD_ST7565::scroll(byte direction, byte pixels) {
-    switch (direction) {
-        case SCROLLUP:    st7565_scrollUp(pixels); break;
-        case SCROLLDOWN:  st7565_scrollDown(pixels); break;
-        case SCROLLLEFT:  st7565_scrollLeft(pixels); break;
-        case SCROLLRIGHT: st7565_scrollRight(pixels); break;
-    }
+    if (rotate180) {
+		switch (direction) {
+			case SCROLLDOWN:  st7565_scrollUp(pixels); break;
+			case SCROLLUP:    st7565_scrollDown(pixels); break;
+			case SCROLLRIGHT: st7565_scrollLeft(pixels); break;
+			case SCROLLLEFT:  st7565_scrollRight(pixels); break;
+		}
+	}
+	else {
+		switch (direction) {
+			case SCROLLUP:    st7565_scrollUp(pixels); break;
+			case SCROLLDOWN:  st7565_scrollDown(pixels); break;
+			case SCROLLLEFT:  st7565_scrollLeft(pixels); break;
+			case SCROLLRIGHT: st7565_scrollRight(pixels); break;
+		}
+	}
 }
