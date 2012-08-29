@@ -153,15 +153,15 @@ void GLCD_ST7565::backLight(byte level) {
 
 // the most basic function, set a single pixel
 void GLCD_ST7565::setPixel(byte x, byte y, byte color) {
-    if (rotate180) {
+	if (rotate180) {
 		x=(LCDWIDTH-1)-x;
 		y=(LCDHEIGHT-1)-y;
-	}    
-  if (x < LCDWIDTH && y < LCDHEIGHT) {
-    if (color) 
-        gLCDBuf[x+ (y/8)*128] |=  _BV(7-(y%8));  
-    else
-        gLCDBuf[x+ (y/8)*128] &= ~_BV(7-(y%8));
+	}
+	if (x < LCDWIDTH && y < LCDHEIGHT) {
+		if (color)
+			gLCDBuf[x+ (y/8)*128] |= _BV(7-(y%8));
+		else
+			gLCDBuf[x+ (y/8)*128] &= ~_BV(7-(y%8));
 
 #if enablePartialUpdate
     if (x<xUpdateMin) xUpdateMin=x;
@@ -179,11 +179,11 @@ static void mySetPixel(byte x, byte y, byte color) {
 		y=(LCDHEIGHT-1)-y;
 	}    
 	if (x < LCDWIDTH && y < LCDHEIGHT) {
-      if (color) 
-          gLCDBuf[x+ (y/8)*128] |=  _BV(7-(y%8));  
-      else
-          gLCDBuf[x+ (y/8)*128] &= ~_BV(7-(y%8));
-    }
+		if (color) 
+			gLCDBuf[x+ (y/8)*128] |=  _BV(7-(y%8));  
+		else
+			gLCDBuf[x+ (y/8)*128] &= ~_BV(7-(y%8));
+		}
 #else
     GLCD_ST7565::setPixel(x, y, color);
 #endif
@@ -410,61 +410,70 @@ void GLCD_ST7565::fillTriangle(byte x0, byte y0, byte x1, byte y1, byte x2, byte
 // filled rectangle
 void GLCD_ST7565::fillRect(byte x, byte y, byte w, byte h, byte color) {
     // stupidest version - just pixels - but fast with internal buffer!
+	byte x1=x;
+	byte x2=x+w-1;
+	byte y1=y;
+	byte y2=y+h-1;
 #if tradeSizeForSpeed
 	if (rotate180) {
-		x=(LCDWIDTH-1)-x;
-		y=(LCDHEIGHT-1)-y;
-		if ((x-w) < xUpdateMin) xUpdateMin = x-w;
-		if ((y-h) < yUpdateMin) yUpdateMin = y-h;
-		if (x > xUpdateMax) xUpdateMax = x;
-		if (y > yUpdateMax) yUpdateMax = y;
-		x=(LCDWIDTH-1)-x;
-		y=(LCDHEIGHT-1)-y;
+		x1=(LCDWIDTH-1)-x-(w-1);
+		y1=(LCDHEIGHT-1)-y-(h-1);
+		x2=(LCDWIDTH-1)-x;
+		y2=(LCDHEIGHT-1)-y;
+		if (x1 < xUpdateMin) xUpdateMin = x1;
+		if (y1 < yUpdateMin) yUpdateMin = y1;
+		if (x2 > xUpdateMax) xUpdateMax = x2;
+		if (y2 > yUpdateMax) yUpdateMax = y2;
 	}
 	else {
-		if (x < xUpdateMin) xUpdateMin = x;
-		if (y < yUpdateMin) yUpdateMin = y;
-		if (x+w > xUpdateMax) xUpdateMax = x+w;
-		if (y+h > yUpdateMax) yUpdateMax = y+h;
+		if (x1 < xUpdateMin) xUpdateMin = x1;
+		if (y1 < yUpdateMin) yUpdateMin = y1;
+		if (x2 > xUpdateMax) xUpdateMax = x2;
+		if (y2 > yUpdateMax) yUpdateMax = y2;
 	}
 #endif
 
-    for (byte i = x; i < x+w; i++) {
-        for (byte j = y; j < y+h; ++j)
-            mySetPixel(i, j, color);
-    }
+
+	for (byte i = x1; i <=x2; i++) {
+		for (byte j = y1; j <=y2; ++j) mySetPixel(i, j, color);
+	}
 }
 
 // draw a rectangle
 void GLCD_ST7565::drawRect(byte x, byte y, byte w, byte h, byte color) {
     // stupidest version - just pixels - but fast with internal buffer!
+	byte x1=x;
+	byte x2=x+w-1;
+	byte y1=y;
+	byte y2=y+h-1;
+
 #if tradeSizeForSpeed
 	if (rotate180) {
-		x=(LCDWIDTH-1)-x;
-		y=(LCDHEIGHT-1)-y;
-		if ((x-w) < xUpdateMin) xUpdateMin = x-w;
-		if ((y-h) < yUpdateMin) yUpdateMin = y-h;
-		if (x > xUpdateMax) xUpdateMax = x;
-		if (y > yUpdateMax) yUpdateMax = y;
-		x=(LCDWIDTH-1)-x;
-		y=(LCDHEIGHT-1)-y;
+		x1=(LCDWIDTH-1)-x-(w-1);
+		y1=(LCDHEIGHT-1)-y-(h-1);
+		x2=(LCDWIDTH-1)-x;
+		y2=(LCDHEIGHT-1)-y;
+		if (x1 < xUpdateMin) xUpdateMin = x1;
+		if (y1 < yUpdateMin) yUpdateMin = y1;
+		if (x2 > xUpdateMax) xUpdateMax = x2;
+		if (y2 > yUpdateMax) yUpdateMax = y2;
 	}
 	else {
-		if (x < xUpdateMin) xUpdateMin = x;
-		if (y < yUpdateMin) yUpdateMin = y;
-		if (x+w > xUpdateMax) xUpdateMax = x+w;
-		if (y+h > yUpdateMax) yUpdateMax = y+h;
+		if (x1 < xUpdateMin) xUpdateMin = x1;
+		if (y1 < yUpdateMin) yUpdateMin = y1;
+		if (x2 > xUpdateMax) xUpdateMax = x2;
+		if (y2 > yUpdateMax) yUpdateMax = y2;
 	}
 #endif
 
-    for (byte i=x; i<x+w; i++) {
-        mySetPixel(i, y, color);
-        mySetPixel(i, y+h-1, color);
+    for (byte i=x1; i<=x2; i++) {
+        mySetPixel(i, y1, color);
+        mySetPixel(i, y2, color);
     }
 
-    for (byte i=y; i<y+h; i++) {
-        mySetPixel(x, i, color);
-        mySetPixel(x+w-1, i, color);
+    for (byte i=y1; i<=y2; i++) {
+        mySetPixel(x1, i, color);
+        mySetPixel(x2, i, color);
     } 
 }
 
