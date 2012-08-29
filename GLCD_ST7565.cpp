@@ -57,7 +57,7 @@ static byte yUpdateMax;
 //#define PAGE_FLIP 0x7
 #define PAGE_FLIP 0x3
 
-const bool rotate180=false;
+const bool rotate180=true;
 // This const switches in the code for operating an LCD panel rotated by 180 degrees.
 // The image created is rotated as it is writen into gLCDBuf. This was much faster than performing the required
 // bit rotates if it had been implimented in the buffer to panel code.
@@ -410,22 +410,23 @@ void GLCD_ST7565::fillTriangle(byte x0, byte y0, byte x1, byte y1, byte x2, byte
 // filled rectangle
 void GLCD_ST7565::fillRect(byte x, byte y, byte w, byte h, byte color) {
     // stupidest version - just pixels - but fast with internal buffer!
-	byte x1=x;
-	byte x2=x+w-1;
-	byte y1=y;
-	byte y2=y+h-1;
 #if tradeSizeForSpeed
 	if (rotate180) {
-		x1=(LCDWIDTH-1)-x-(w-1);
-		y1=(LCDHEIGHT-1)-y-(h-1);
-		x2=(LCDWIDTH-1)-x;
-		y2=(LCDHEIGHT-1)-y;
+		byte x1=(LCDWIDTH-1)-x-(w-1);
+		byte y1=(LCDHEIGHT-1)-y-(h-1);
+		byte x2=(LCDWIDTH-1)-x;
+		byte y2=(LCDHEIGHT-1)-y;
 		if (x1 < xUpdateMin) xUpdateMin = x1;
 		if (y1 < yUpdateMin) yUpdateMin = y1;
 		if (x2 > xUpdateMax) xUpdateMax = x2;
 		if (y2 > yUpdateMax) yUpdateMax = y2;
 	}
 	else {
+		byte x1=x;
+		byte x2=x+w-1;
+		byte y1=y;
+		byte y2=y+h-1;
+
 		if (x1 < xUpdateMin) xUpdateMin = x1;
 		if (y1 < yUpdateMin) yUpdateMin = y1;
 		if (x2 > xUpdateMax) xUpdateMax = x2;
@@ -434,31 +435,32 @@ void GLCD_ST7565::fillRect(byte x, byte y, byte w, byte h, byte color) {
 #endif
 
 
-	for (byte i = x1; i <=x2; i++) {
-		for (byte j = y1; j <=y2; ++j) mySetPixel(i, j, color);
+	for (byte i = x; i <x+w; i++) {
+		for (byte j = y; j <y+h; ++j) mySetPixel(i, j, color);
 	}
 }
 
 // draw a rectangle
 void GLCD_ST7565::drawRect(byte x, byte y, byte w, byte h, byte color) {
     // stupidest version - just pixels - but fast with internal buffer!
-	byte x1=x;
-	byte x2=x+w-1;
-	byte y1=y;
-	byte y2=y+h-1;
 
 #if tradeSizeForSpeed
 	if (rotate180) {
-		x1=(LCDWIDTH-1)-x-(w-1);
-		y1=(LCDHEIGHT-1)-y-(h-1);
-		x2=(LCDWIDTH-1)-x;
-		y2=(LCDHEIGHT-1)-y;
+		byte x1=(LCDWIDTH-1)-x-(w-1);
+		byte y1=(LCDHEIGHT-1)-y-(h-1);
+		byte x2=(LCDWIDTH-1)-x;
+		byte y2=(LCDHEIGHT-1)-y;
 		if (x1 < xUpdateMin) xUpdateMin = x1;
 		if (y1 < yUpdateMin) yUpdateMin = y1;
 		if (x2 > xUpdateMax) xUpdateMax = x2;
 		if (y2 > yUpdateMax) yUpdateMax = y2;
 	}
 	else {
+		byte x1=x;
+		byte x2=x+w-1;
+		byte y1=y;
+		byte y2=y+h-1;
+
 		if (x1 < xUpdateMin) xUpdateMin = x1;
 		if (y1 < yUpdateMin) yUpdateMin = y1;
 		if (x2 > xUpdateMax) xUpdateMax = x2;
@@ -466,14 +468,14 @@ void GLCD_ST7565::drawRect(byte x, byte y, byte w, byte h, byte color) {
 	}
 #endif
 
-    for (byte i=x1; i<=x2; i++) {
-        mySetPixel(i, y1, color);
-        mySetPixel(i, y2, color);
+    for (byte i=x; i<x+w; i++) {
+        mySetPixel(i, y, color);
+        mySetPixel(i, y+h-1, color);
     }
 
-    for (byte i=y1; i<=y2; i++) {
-        mySetPixel(x1, i, color);
-        mySetPixel(x2, i, color);
+    for (byte i=y; i<y+h; i++) {
+        mySetPixel(x, i, color);
+        mySetPixel(x+w-1, i, color);
     } 
 }
 
