@@ -57,7 +57,7 @@ static byte yUpdateMax;
 //#define PAGE_FLIP 0x7
 #define PAGE_FLIP 0x3
 
-const bool rotate180=true;
+const bool rotate180=false;
 // This const switches in the code for operating an LCD panel rotated by 180 degrees.
 // The image created is rotated as it is writen into gLCDBuf. This was much faster than performing the required
 // bit rotates if it had been implimented in the buffer to panel code.
