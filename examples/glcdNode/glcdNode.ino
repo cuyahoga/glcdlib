@@ -14,7 +14,7 @@ class GraphicsBoard : public GLCD_ST7565, public Print {
     
     void newline() {
         x = 0;
-        if (y >= 58)
+        if (y >= 54)
             scroll(SCROLLUP, 6);
         else
             y += 6;
@@ -61,7 +61,8 @@ struct {
 void setup () {
     Serial.begin(57600);
     Serial.println("\n[glcdNode]");
-    rf12_initialize(1, RF12_868MHZ, 5);
+    //rf12_initialize(1, RF12_868MHZ, 5);
+    rf12_config();
     glcd.begin();
     glcd.backLight(255);
     glcd.setFont(font_clR6x6);
