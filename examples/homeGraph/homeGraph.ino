@@ -66,11 +66,11 @@ static void showGraph () {
     if (solarHist[i] > maxSolar) maxSolar = solarHist[i];
     if (totalHist[i] > maxTotal) maxTotal = totalHist[i];
   }
-  if (maxSolar + maxTotal < 3)
+  if (maxSolar + maxTotal < 28)
     return;
-  // scale the graph, careful to avoid 16-bit overflow
-  word halfWattPerTick = ((maxSolar / 2 + maxTotal / 2 + 54) / 55) * 2;
-  word baseline = 3 + maxSolar / halfWattPerTick;
+  // scale the graph
+  word halfWattPerTick = (maxSolar + maxTotal + 28) / 56;
+  word baseline = 2 + maxSolar / halfWattPerTick;
   glcd.drawLine(0, baseline, 80, baseline, 1);
   // draw the hourly dots
   for (byte i = 0; i < NUMHIST/4; ++i)
