@@ -111,12 +111,13 @@ static const char* summaryLine () {
   // correction because counts are in units of 0.5 W
   sSum /= 2;
   tSum /= 2;
+  // avoid floating point, but still display with 1 or 2 decimals
   static char buf [20];
-  if (sSum <= 999)
+  if (sSum <= 9999)
     sprintf(buf, "KWh +%d.%02d", sSum / 1000, (sSum / 10) % 100);
   else
     sprintf(buf, "KWh +%02d.%d", sSum / 1000, (sSum / 100) % 10);
-  if (tSum <= 999)
+  if (tSum <= 9999)
     sprintf(buf + 9, " -%d.%02d", tSum / 1000, (tSum / 10) % 100);
   else
     sprintf(buf + 9, " -%02d.%d", tSum / 1000, (tSum / 100) % 10);
