@@ -66,10 +66,10 @@ static void showGraph () {
     if (solarHist[i] > maxSolar) maxSolar = solarHist[i];
     if (totalHist[i] > maxTotal) maxTotal = totalHist[i];
   }
-  if (maxSolar + maxTotal < 28)
-    return;
   // scale the graph
-  word halfWattPerTick = (maxSolar + maxTotal + 28) / 56;
+  word halfWattPerTick = (maxSolar + maxTotal + 55) / 56;
+  if (halfWattPerTick < 1)
+    halfWattPerTick = 1;
   word baseline = 2 + maxSolar / halfWattPerTick;
   glcd.drawLine(0, baseline, 80, baseline, 1);
   // draw the hourly dots
@@ -160,7 +160,7 @@ static void showPowerInfo (const struct PayloadItem* payload) {
 // go to sleep, wakeup again just before the next packet
 static void snoozeJustEnough (bool timingWasGood) {
   const word recvWindow = 150;
-  word recvOffTime = 2800;
+  word recvOffTime = 3000;
   if (!timingWasGood)
     recvOffTime -= recvWindow;
 
@@ -181,6 +181,8 @@ void setup () {
   glcd.refresh();
   rf12_initialize(1, RF12_868MHZ, GROUP);
   loadGraphData();
+  // show some info on startup, before the first packet comes in
+  showPowerInfo((const struct PayloadItem*) rf12_data);
 }
 
 void loop () {
