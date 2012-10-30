@@ -114,7 +114,7 @@ static const char* summaryLine () {
   // avoid floating point, but still display with 1 or 2 decimals
   static char buf [20];
   if (sSum <= 9999)
-    sprintf(buf, "KWh +%d.%02d", sSum / 1000, (sSum / 10) % 100);
+    sprintf(buf, "kWh +%d.%02d", sSum / 1000, (sSum / 10) % 100);
   else
     sprintf(buf, "KWh +%02d.%d", sSum / 1000, (sSum / 100) % 10);
   if (tSum <= 9999)
@@ -136,9 +136,14 @@ static void processCounts (const struct PayloadItem* payload) {
     prevTotal = lastTotal;
     firstTime = false;
   }
+  // ignore excessive diffs, let's assume the sender has been reset
+  word solarDiff = lastSolar - prevSolar;
+  word totalDiff = lastTotal - prevTotal;
+  if (solarDiff > 50 || totalDiff > 50)
+    return; // i.e. reject 50 pulses in last 10s, it would be 10 kW
   // track the accumulated half-Wh values for graphing
-  solarHist[NUMHIST-1] += lastSolar - prevSolar;
-  totalHist[NUMHIST-1] += lastTotal - prevTotal;
+  solarHist[NUMHIST-1] += solarDiff;
+  totalHist[NUMHIST-1] += totalDiff;
 }
 
 // redraw entire display with the latest info
