@@ -139,8 +139,8 @@ static void processCounts (const struct PayloadItem* payload) {
   // ignore excessive diffs, let's assume the sender has been reset
   word solarDiff = lastSolar - prevSolar;
   word totalDiff = lastTotal - prevTotal;
-  if (solarDiff > 50 || totalDiff > 50)
-    return; // i.e. reject 50 pulses in last 10s, it would be 10 kW
+  if (solarDiff > 1000 || totalDiff > 1000)
+    return; // i.e. reject if more than 1000 pulses were added
   // track the accumulated half-Wh values for graphing
   solarHist[NUMHIST-1] += solarDiff;
   totalHist[NUMHIST-1] += totalDiff;
