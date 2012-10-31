@@ -13,10 +13,10 @@
 #include "GLCD_ST7565.h"
 #include "GLCD_ST7565_cmds.h"
 
-#define PIN_SID  9
-#define PIN_SCLK 8
-#define PIN_A0   7
-#define PIN_RST  6
+#define PIN_SID  14
+#define PIN_SCLK 4
+#define PIN_A0   17
+#define PIN_RST  7
 #define PIN_CS   5
 
 #define LCDUNUSEDSTARTBYTES 1
@@ -34,7 +34,7 @@ struct FontInfo {
 static byte gLCDBuf[1024];
 
 // Switch from fast direct bit flipping to slower Arduino bit writes.
-#define slowSPI
+//#define slowSPI
 
 // This makes the library track where changes have occurred and only update the smallest rectangle required
 // If you are writing direct to the gLCDBuf you will either need to turn this off, or call setUpdateArea() with the
@@ -66,17 +66,20 @@ static void SPIWrite(byte c) {
 #ifdef slowSPI
     shiftOut(PIN_SID, PIN_SCLK, MSBFIRST, c);
 #else
+    // The CS pin must be toggled either side of writing the data http://edeca.net/wp/electronics/the-st7565-display-controller/
+    bitClear(PORTD, 5);
     for (byte mask = 0x80; mask != 0; mask >>= 1) {
         bitWrite(PORTC, 0, c & mask);
         // this is 15% faster, but it's too fast for this chip...
-        //PIND = bit(4);
-        //PIND = bit(4);
+        PIND = bit(4);
+        PIND = bit(4);
         // even plain set/clear is too fast, so slow down a bit more
-        bitSet(PORTD, 4);
-        bitSet(PORTD, 4);
-        bitClear(PORTD, 4);
-        bitClear(PORTD, 4);
+//        bitSet(PORTD, 4);
+//        bitSet(PORTD, 4);
+//        bitClear(PORTD, 4);
+//        bitClear(PORTD, 4);
     }
+    bitSet(PORTD, 5);
 #endif
 }
 
@@ -114,9 +117,6 @@ static void st7565_Init() {
     pinMode(PIN_A0,   OUTPUT);
     pinMode(PIN_RST,  OUTPUT);
     pinMode(PIN_CS,   OUTPUT);
-
-    // toggle RST low to reset; CS low so it'll listen to us
-    digitalWrite(PIN_CS, LOW);
 
     digitalWrite(PIN_RST, LOW);
     _delay_ms(500);
